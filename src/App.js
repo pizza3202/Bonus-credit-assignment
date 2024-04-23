@@ -19,7 +19,7 @@ function App() {
   const fetchNumberFact = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://numbersapi.com/random/trivia');
+      const response = await axios.get('https://numbersapi.com/random/trivia');
       setFact(response.data);
     } catch (error) {
       console.error('Error fetching number fact:', error);
