@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import backgroundImage from './image/jason-leung-Xaanw0s0pMk-unsplash.jpg';
+
 function App() {
   const [fact, setFact] = useState('');
+  const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const fetchUselessFact = async () => {
     setLoading(true);
+    setError('');
     try {
       const response = await axios.get('https://uselessfacts.jsph.pl/random.json?language=en');
       setFact(response.data.text);
@@ -16,14 +20,20 @@ function App() {
     }
     setLoading(false);
   };
-  const fetchNumberFact = async () => {
+  const fetchGifs = async () => {
+    if (!keyword.trim()) {
+      setError('Input cannot be empty. Please enter a keyword.');
+      return;
+    }
     setLoading(true);
+    setError('');
     try {
-      const response = await axios.get('https://numbersapi.com/random/trivia');
-      setFact(response.data);
+      const response = await axios.get(`https://api.giphy.com/v1/gifs/search?api_key=1OB7erHZUFbQUIfCLa8PoxzutQW0eQXr&q=${keyword}&limit=1`);
+      const gif = response.data.data.length > 0 ? response.data.data[0].images.fixed_height.url : "No GIFs found.";
+      setFact(<img src={gif} alt="GIF" />);
     } catch (error) {
-      console.error('Error fetching number fact:', error);
-      setFact('Failed to fetch a new fact. Please try again.');
+      console.error('Error fetching GIF:', error);
+      setFact('Failed to fetch a GIF. Please try again.');
     }
     setLoading(false);
   };
@@ -31,13 +41,25 @@ function App() {
     <div className="App" style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover' }}>
       <div className="container">
         <h1>😆😆😆Random Fun Facts😆😆😆</h1>
-        <button onClick={fetchUselessFact} disabled={loading} className="fact-button get-useless-facts-button">
-          {loading ? 'Fetching Fact...' : 'Get Useless Fact'}
-        </button>
-        <button onClick={fetchNumberFact} disabled={loading} className="fact-button get-number-fact-button">
-          {loading ? 'Fetching Fact...' : 'Get Number Fact'}
-        </button>
-        <div className="fact-display output-text">{fact}</div>
+        <section>
+          <button onClick={fetchUselessFact} disabled={loading} className="fact-button get-useless-facts-button">
+            {loading ? 'Fetching Fact...' : 'Get Useless Fact'}
+          </button>
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="Enter a keyword for a GIF"
+            className="keyword-input"
+          />
+          <button onClick={fetchGifs} disabled={loading} className="fact-button get-gif-button">
+            {loading ? 'Searching...' : 'Search GIF'}
+          </button>
+        </section>
+        <section className="fact-display output-text">
+          {error && <div className="error-message">{error}</div>}
+          {fact && !error && fact}
+        </section>
       </div>
     </div>
   );
