@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './App.css';
 import backgroundImage from './image/jason-leung-Xaanw0s0pMk-unsplash.jpg';
-
 function App() {
   const [fact, setFact] = useState('');
   const [keyword, setKeyword] = useState('');
@@ -23,17 +22,24 @@ function App() {
   const fetchGifs = async () => {
     if (!keyword.trim()) {
       setError('Input cannot be empty. Please enter a keyword.');
+      setFact('');
       return;
     }
     setLoading(true);
     setError('');
     try {
       const response = await axios.get(`https://api.giphy.com/v1/gifs/search?api_key=1OB7erHZUFbQUIfCLa8PoxzutQW0eQXr&q=${keyword}&limit=1`);
-      const gif = response.data.data.length > 0 ? response.data.data[0].images.fixed_height.url : "No GIFs found.";
-      setFact(<img src={gif} alt="GIF" />);
+      if (response.data.data.length > 0) {
+        const gifUrl = response.data.data[0].images.fixed_height.url;
+        setFact(<img src={gifUrl} alt="GIF" />);
+      } else {
+        setError('No GIFs found. Try a different keyword.');
+        setFact('');
+      }
     } catch (error) {
       console.error('Error fetching GIF:', error);
-      setFact('Failed to fetch a GIF. Please try again.');
+      setError('Failed to fetch a GIF. Please try again.');
+      setFact('');
     }
     setLoading(false);
   };
